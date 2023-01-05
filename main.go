@@ -2,19 +2,21 @@ package main
 
 import (
 	"logput/console"
+
 )
 
-var logger console.Logger
+var Logger console.Logger
 
 func TestFunc(){
-	logger.INFO("this is info log....")
-	logger.DEBUG("xxxxxxxxxxxxx%d", 10)
-	logger.WARN("WARNNNNNNNNNNNNNNN")
-	logger.ERROR("ERRORRRRRRRRRR")
-	logger.FATAL("FATALLLLLLLLLLLLLLL")
+	Logger.INFO("this is info log....")
+	Logger.DEBUG("xxxxxxxxxxxxx%d", 10)
+	Logger.WARN("WARNNNNNNNNNNNNNNN")
+	Logger.ERROR("ERRORRRRRRRRRR")
+	Logger.FATAL("FATALLLLLLLLLLLLLLL")
 }
 
 func main() {
-	logger = logger.SetLevel("INFO")
+	Logger = Logger.SetLevel("INFO")
 	TestFunc()
+
 }
