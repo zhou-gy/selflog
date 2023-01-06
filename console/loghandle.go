@@ -1,6 +1,7 @@
 package console
 
 import (
+	"encoding/json"
 	"fmt"
 	"runtime"
 	"strings"
@@ -18,6 +19,13 @@ const (
 
 type logger struct {
 	Level uint16
+	Ptype string
+}
+type jsonlog struct {
+	Time string
+	Level string
+	Caller string
+	Msg string
 }
 
 type Logger logger
@@ -48,8 +56,24 @@ func (l Logger) SetLevel(level string) Logger {
 
 func (l *Logger) log(levelstr, format string, arg ...interface{}) {
 	if l.Level <= LogLevel(levelstr) {
-		s := fmt.Sprintf("%s [%s] [%s] %s", time.Now().Format("2006-01-02 15:04:05"), levelstr,getFuncName() ,fmt.Sprintf(format, arg...))
-		fmt.Println(s)
+		switch l.Ptype {
+		case "json" , "JSON","Json":
+			logJson := jsonlog{
+				Time: time.Now().Format("2006-01-02 15:04:05"),
+				Level: levelstr,
+				Caller: getFuncName(),
+				Msg: fmt.Sprintf(format, arg...),
+			}
+			b, err := json.Marshal(logJson)
+			if err != nil {
+				fmt.Printf("json Marshal err: %v\n",err)
+				return
+			}
+			fmt.Printf("%s\n",b)
+		default:
+			s := fmt.Sprintf("%s [%s] [%s] %s", time.Now().Format("2006-01-02 15:04:05"), levelstr,getFuncName() ,fmt.Sprintf(format, arg...))
+			fmt.Println(s)
+		}
 	}
 }
 
@@ -82,7 +106,7 @@ func getFuncName() string{
 	funcname := runtime.FuncForPC(pc).Name()
 	filenameList := strings.Split(file,"/")
 	filename := filenameList[len(filenameList)-1]
-	return fmt.Sprintf("%s => %s ,line %d",filename,funcname,line)
+	return fmt.Sprintf("%s → %s ,line %d",filename,funcname,line)
 }
 
 
