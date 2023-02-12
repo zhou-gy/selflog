@@ -12,8 +12,8 @@ func TestFunc(){
 	Logger.ERROR("xxxxxxxxxxx %s %d","lalala",100)
 }
 func main() {
-	Logger = Logger.SetLevel("INFO")
-	Logger.Ptype = "json"
+	Logger = Logger.SetLevel("INFO","json")
+	// Logger.Ptype = "json"
 	
 	TestFunc()
 
