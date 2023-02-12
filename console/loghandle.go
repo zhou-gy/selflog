@@ -1,8 +1,10 @@
 package console
 
+
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/fatih/color"
 	"runtime"
 	"strings"
 	"time"
@@ -28,7 +30,8 @@ type jsonlog struct {
 	Msg string
 }
 
-type Logger logger
+//type Logger logger
+var Logger logger
 
 func LogLevel(level string) uint16 {
 	level = strings.ToUpper(level)
@@ -49,15 +52,33 @@ func LogLevel(level string) uint16 {
 }
 
 // level => ["DEBUG", "INFO", "WARN", "ERROR", "FATAL" ]
-func (l Logger) SetLevel(level string) Logger {
-	l.Level = LogLevel(level)
+func (l logger) SetLevel(lv ,logType string) logger {
+	l.Level = LogLevel(lv)
+	l.Ptype = logType
 	return l
 }
 
-func (l *Logger) log(levelstr, format string, arg ...interface{}) {
+func colorPrint(levelStr, msg string)  {
+	switch levelStr {
+	case "DEBUG":
+		color.Cyan(msg)
+		//color.White(msg)
+	case "INFO":
+		color.Green(msg)
+	case "WARN":
+		color.Yellow(msg)
+	case "ERROR":
+		color.Red(msg)
+	default:
+		color.Black(msg)
+	}
+}
+
+func (l *logger) log(levelstr, format string, arg ...interface{}) {
 	if l.Level <= LogLevel(levelstr) {
-		switch l.Ptype {
-		case "json" , "JSON","Json":
+
+		switch strings.ToUpper(l.Ptype) {
+		case "JSON":
 			logJson := jsonlog{
 				Time: time.Now().Format("2006-01-02 15:04:05"),
 				Level: levelstr,
@@ -69,31 +90,34 @@ func (l *Logger) log(levelstr, format string, arg ...interface{}) {
 				fmt.Printf("json Marshal err: %v\n",err)
 				return
 			}
-			fmt.Printf("%s\n",b)
+			colorPrint(levelstr,string(b))
+			//fmt.Printf("%s\n",b)
+
 		default:
 			s := fmt.Sprintf("%s [%s] [%s] %s", time.Now().Format("2006-01-02 15:04:05"), levelstr,getFuncName() ,fmt.Sprintf(format, arg...))
-			fmt.Println(s)
+			//fmt.Println(s)
+			colorPrint(levelstr,s)
 		}
 	}
 }
 
-func (l *Logger) DEBUG(format string, arg ...interface{}) {
+func (l *logger) DEBUG(format string, arg ...interface{}) {
 	l.log("DEBUG", format, arg...)
 }
 
-func (l *Logger) INFO(format string, arg ...interface{}) {
+func (l *logger) INFO(format string, arg ...interface{}) {
 	l.log("INFO", format, arg...)
 }
 
-func (l *Logger) WARN(format string, arg ...interface{}) {
+func (l *logger) WARN(format string, arg ...interface{}) {
 	l.log("WARN", format, arg...)
 }
 
-func (l *Logger) ERROR(format string, arg ...interface{}) {
+func (l *logger) ERROR(format string, arg ...interface{}) {
 	l.log("ERROR", format, arg...)
 }
 
-func (l *Logger) FATAL(format string, arg ...interface{}) {
+func (l *logger) FATAL(format string, arg ...interface{}) {
 	l.log("FATAL", format, arg...)
 }
 
@@ -108,5 +132,4 @@ func getFuncName() string{
 	filename := filenameList[len(filenameList)-1]
 	return fmt.Sprintf("%s → %s ,line %d",filename,funcname,line)
 }
-
 
